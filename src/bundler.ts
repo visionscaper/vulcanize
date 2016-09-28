@@ -29,6 +29,7 @@ import * as matchers from './matchers';
 import * as urlUtils from './url-utils';
 import DocumentCollection from './document-collection';
 import {buildDepsIndex, BundleOrchestrator} from './deps-index';
+import {IBundleStrategy, generateBundles} from './bundle-manifest';
 
 // TODO(usergenic): Document every one of these options.
 export interface Options {
@@ -391,19 +392,24 @@ class Bundler {
    * Given Multiple urls, produces a sharded build by applying the provided
    * heuristic.
    */
-  async bundle(bundles: string[], heuristic?: BundleOrchestrator):
+  async bundle(bundles: string[], heuristic?: IBundleStrategy):
       Promise<DocumentCollection> {
     if (!this.analyzer) {
       throw new Error('No analyzer provided.');
     }
+
+    const depsIndex = await buildDepsIndex(bundles, this.analyzer!);
+    if (heuristic) {
+      const initialBundles = generateBundles(depsIndex.fragmentToDeps);
+      const bundles = heuristic(initialBundles);
+      console.log(bundles);
+      return;
+    }
     const doc = await this._bundleDocument(
-        bundles[0], this.excludes, this.stripExcludes, this.analyzer);
+    bundles[0], this.excludes, this.stripExcludes, this.analyzer);
     const collection = new Map<string, ASTNode>();
     collection.set(bundles[0], doc);
     return collection;
-    // const depsIndex = buildDepsIndex(bundles, this.analyzer) const manifest =
-    //     this._bundleManifest() return this._bundleMultiple(url,
-    //     this.analyzer);
   }
 
 

@@ -73,7 +73,6 @@ suite('Bundler', () => {
         const sortEntry = (a: any, b: any) => a[0].localeCompare(b[0]);
         actualEntries.sort(sortEntry);
         expectedEntries.sort(sortEntry);
-        console.log(actualEntries, expectedEntries);
         if (actualEntries.length !== expectedEntries.length) {
           throw new chai.AssertionError(
               `Expected ${expectedEntries.length
